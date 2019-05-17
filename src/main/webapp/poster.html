@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Tiny Pet</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<script src="https://unpkg.com/mithril/mithril.js"></script>
+	
+	
+	
+	<script>
+	
+	
+    var root = document.body
+    
+ // Entité petition avec les appels REST
+	var Petition = {
+	    list: [],
+	    loadList: function() {
+	        return m.request({
+	            method: "GET",
+	            url: "https://cloudtinypet.appspot.com/api/myApi/v1/entity/titi",
+	            withCredentials: true,
+	        })
+	        .then(function(result) {
+	            Petition.list = result.data
+	        })
+	    },
+	
+	    current: {},
+	    load: function(id) {
+	        return m.request({
+	            method: "GET",
+	            url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
+	            withCredentials: true,
+	        })
+	        .then(function(result) {
+	            Petitioncurrent = result
+	        })
+	    },
+	
+	    save: function() {
+	        return m.request({
+	            method: "POST",
+	            url: "https://cloudtinypet.appspot.com/myApi/v1/postPetition/"
+	            					+Petition.current.title+"/"+Petition.current.body+"/"
+	            					+Petition.current.category,
+	            data: Petition.current,
+	          
+	            withCredentials: true,
+	        })
+	    }
+	}
+    
+    // formulaire pour poster une petition
+	 var PetitionForm = {
+				view: function() {
+			        return m("form", {
+			                onsubmit: function(e) {
+			                    e.preventDefault()
+			                    Petition.save()
+			                }
+			            }, [
+			            m("label.label", "title"),
+			            m("input.input[type=text][placeholder=title]",{
+			                oninput: function (e) {Petition.current.title=e.target.value},
+			                value: Petition.current.title
+			            }),
+			            m("label.label", "body"),
+			            m("input.input[type=text][placeholder=body]", {
+			                oninput: function (e) {Petition.current.body=e.target.value},
+			                value: Petition.current.body
+			            }), 
+			            m("label.label", "Category"),
+			            m("input.input[type=text][placeholder=category]", {
+			                oninput: function (e) {Petition.current.category=e.target.value},
+			                value: Petition.current.category
+			            }),
+			          
+			            
+			            m("button.button[type=submit]", "Submit"),
+			        ])
+			    }
+		}
+    
+    
+	
+	 var Hello = {
+	 	    view: function() {
+	 	    	return m("main", [
+	 	            m("h1", {class: "title"}, "Poster une petition"),
+	 	            m("a", {href:"index.html"}, "Retour a l'accueil"),
+	 	            m("a", {href:"listPetition.html"}, "List des petitions"),
+	 	            m("div", {id: "form"}, m(PetitionForm)),
+	 	      
+	 	          
+	 	        ])
+	 	    }
+	 	}
+
+ 	m.mount(document.body, Hello)	
+    
+	</script>
+</body>
+</html>

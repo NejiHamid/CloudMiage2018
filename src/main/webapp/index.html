@@ -1,0 +1,108 @@
+<html>
+<head>
+	<title>Tiny Pet</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<script src="https://unpkg.com/mithril/mithril.js"></script>
+	
+	
+	<script>
+	
+    var root = document.body
+	
+    // appel REST pour manipuler les entite
+		var User = {
+		    list: [],
+		    loadList: function() {
+		        return m.request({
+		            method: "GET",
+		            url: "https://rem-rest-api.herokuapp.com/api/users",
+		            withCredentials: true,
+		        })
+		        .then(function(result) {
+		            User.list = result.data
+		        })
+		    },
+		
+		    current: {},
+		    load: function(id) {
+		        return m.request({
+		            method: "GET",
+		            url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
+		            withCredentials: true,
+		        })
+		        .then(function(result) {
+		            User.current = result
+		        })
+		    },
+		
+		    save: function() {
+		        return m.request({
+		            method: "PUT",
+		            url: "https://rem-rest-api.herokuapp.com/api/users/" + User.current.id,
+		            data: User.current,
+		            withCredentials: true,
+		        })
+		    }
+		}
+	
+    // affichage de la liste des score
+	 var UserView = {
+	 		oninit: User.loadList,
+	 	    view: function() {
+	 	        return m(".user-list", User.list.map(function(user) {
+	 	            return m(".user-list-item", user.firstName + " " + user.lastName)
+	 	        }))
+	 	    },
+	 		
+	 }
+	
+	 
+	 var LoginForm = {
+	 		view: function() {
+	 	        return m("form", {
+	 	                onsubmit: function(e) {
+	 	                    e.preventDefault()
+	 	                    User.save()
+	 	                }
+	 	            }, [
+	 	            m("label.label", "User"),
+	 	            m("input.input[type=int][placeholder=firstName]",{
+	 	                oninput: function (e) {User.current.firstName=e.target.value},
+	 	                value: User.current.firstName
+	 	            }),
+	 	            m("label.label", "password"),
+	 	            m("input.input[type=text][placeholder=lastName]", {
+	 	                oninput: function (e) {User.current.lastName=e.target.value},
+	 	                value: User.current.lastName
+	 	            }),
+	 	            m("button.button[type=submit]", "Connexion"),
+	 	        ])
+	 	    }
+	 }
+    
+    
+	
+	 var Hello = {
+	 	    view: function() {
+	 	    	return m("main", [
+	 	            m("h1", {class: "title"}, "Site de petition"),
+	 	            m("a", {href:"poster.html"}, "Poster une petition"),
+					m("a", {href:"listePetition.html"}, "Liste des petitions"),
+					m("div", {id: "form"}, m(LoginForm)),
+	 	            m("h1", {class: "title"}, "Trending petitions"),
+	 	            m("div", {id: "box"}, m(UserView)),
+	 	        ])
+	 	    }
+	 	}
+
+ m.mount(document.body, Hello)	
+    
+    
+    
+    
+
+	</script>
+</body>
+</html>

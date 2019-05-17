@@ -1,0 +1,133 @@
+<html>
+<head>
+	<title>Tiny Pet</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<script src="https://unpkg.com/mithril/mithril.js"></script>
+	
+	
+	<script>
+	
+    var root = document.body
+	
+    // appel REST pour manipuler les entite
+		var User = {
+		    list: [],
+		    loadList: function() {
+		        return m.request({
+		            method: "GET",
+		            url: "https://cloudtinypet.appspot.com/api/myApi/v1/listAllPetition",
+		            withCredentials: true,
+		        })
+		        .then(function(result) {
+		            User.list = result.data
+		        })
+		    },
+		
+		    current: {},
+		    load: function(id) {
+		        return m.request({
+		            method: "GET",
+		            url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
+		            withCredentials: true,
+		        })
+		        .then(function(result) {
+		            User.current = result
+		        })
+		    },
+		
+		    save: function() {
+		        return m.request({
+		            method: "POST",
+		            url: "https://cloudtinypet.appspot.com/api/myApi/v1/postPetition/"+Petition.current.title+"/"+Petition.current.body+"/"+Petition.current.category,
+		            data: User.current,
+		            withCredentials: true,
+		        })
+		    }
+		    
+		 // fonction pour voter pour
+		    votePour: function(){
+		        return m.request({
+		            method: "PUT",
+		            url: "https://rem-rest-api.herokuapp.com/api/users/" + Petition.current.id,
+		            data: Petition.score = Petition.score + 1,
+		        })
+		    },
+
+		     // fonction pour voter contre
+		     voteContre: function(){
+		        return m.request({
+		            method: "PUT",
+		            url: "https://rem-rest-api.herokuapp.com/api/users/" + Petition.current.id,
+		            data: Petition.score = Petition.score - 1,
+		        })
+		     }
+		}
+	
+    // affichage de la liste des score
+    var UserView = {
+    		oninit: User.loadList,
+    	    view: function() {
+
+    	        return m(".user-list", User.list.map(function(user) {
+    	                return m("main", [
+    	                    m("a.user-list-item", user.firstName + " " + user.lastName + "      " +
+    	                        "   Nombre de vote :  " ),
+    	                    m("button",{class:"votePour", onclick: Petition.current.votePour }, " voter pour"),
+    	                    m("button",{class:"voteContre", onclick: Petition.current.voteContre},"voter contre")
+    	                ])
+    	            }
+    	        ))
+    	    }
+	 		
+	 }
+	
+	 
+	 var LoginForm = {
+	 		view: function() {
+	 	        return m("form", {
+	 	                onsubmit: function(e) {
+	 	                    e.preventDefault()
+	 	                    User.save()
+	 	                }
+	 	            }, [
+	 	            m("label.label", "User"),
+	 	            m("input.input[type=int][placeholder=firstName]",{
+	 	                oninput: function (e) {User.current.firstName=e.target.value},
+	 	                value: User.current.firstName
+	 	            }),
+	 	            m("label.label", "password"),
+	 	            m("input.input[type=text][placeholder=lastName]", {
+	 	                oninput: function (e) {User.current.lastName=e.target.value},
+	 	                value: User.current.lastName
+	 	            }),
+	 	            m("button.button[type=submit]", "Save"),
+	 	        ])
+	 	    }
+	 }
+    
+    
+	
+	 var Hello = {
+	 	    view: function() {
+	 	    	return m("main", [
+	 	            m("h1", {class: "title"}, "Liste des petitions"),
+	 	            m("a", {href:"index.html"}, "Accueil"),
+	 	            m("a", {href:"poster.html"}, "Poster une petition"),		
+	 	            m("div", {id: "form"}, m(LoginForm)),	
+	 	            m("h1", {class: "title"}, "Trending petitions"),
+	 	            m("div", {id: "box"}, m(UserView)),
+	 	        ])
+	 	    }
+	 	}
+
+ m.mount(document.body, Hello)	
+    
+    
+    
+    
+
+	</script>
+</body>
+</html>
